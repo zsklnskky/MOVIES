@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0e0f17">
-<title>Моя коллекция фильмов</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="КИНОТЕКА">
+<title>КИНОТЕКА — личная фильмотека</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -110,9 +117,15 @@ aside.side{grid-area:side;background:color-mix(in srgb,var(--card) 70%,transpare
 
 /* ─── Main ───────────────────────────────────────────────────────── */
 main{grid-area:main;padding:28px 36px 100px;width:100%;max-width:1280px;margin:0 auto}
-.page-head{display:flex;align-items:flex-end;gap:14px;margin:6px 0 22px}
+.page-head{display:flex;align-items:flex-end;gap:14px;margin:6px 0 22px;flex-wrap:wrap}
 .page-head h1{font-size:clamp(24px,3.4vw,34px);font-weight:700;margin:0;letter-spacing:-.01em}
-.page-head .sub{color:var(--text-muted);font-size:13.5px;margin-left:auto}
+.ph-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.page-head .sub{color:var(--text-muted);font-size:13.5px}
+.sort-sel{background:var(--bg);border:1px solid var(--border);color:var(--text);
+  border-radius:var(--radius-pill);padding:9px 15px;font-size:13px;font-weight:600;cursor:pointer;outline:none}
+.sort-sel:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.btn-burger{display:none}
+.drawer-backdrop{display:none}
 
 .grid{display:grid;gap:24px 20px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 .poster-card{cursor:pointer;display:flex;flex-direction:column;gap:11px;
@@ -348,10 +361,30 @@ main{grid-area:main;padding:28px 36px 100px;width:100%;max-width:1280px;margin:0
 
 @media(max-width:880px){
   .app{grid-template-columns:1fr;grid-template-areas:"header" "main"}
-  aside.side{display:none}
+  .btn-burger{display:inline-flex}
+  aside.side{position:fixed;top:0;left:0;height:100dvh;width:286px;z-index:130;
+    transform:translateX(-103%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 0 44px #000b;border-right:1px solid var(--border)}
+  body.drawer-open aside.side{transform:none}
+  .drawer-backdrop{display:block;position:fixed;inset:0;z-index:120;background:#000b;
+    backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+  body.drawer-open .drawer-backdrop{opacity:1;visibility:visible}
+  .add-label{display:none}
+  .add-btn{padding:10px 13px;font-size:16px}
+  .logo-text{font-size:17px}
   .logo-text .meta{display:none}
-  .detail .hero{flex-direction:column;align-items:center;text-align:center}
+  main{padding:22px 15px 90px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(142px,1fr));gap:16px 12px}
+  .poster-card{padding:8px;border-radius:16px;gap:9px}
+  .poster-meta .title{font-size:14.5px}
+  .top input[type="search"]{flex:1 1 90px;min-width:0}
+  .detail{border-radius:20px}
+  .detail .hero{flex-direction:column;align-items:center;text-align:center;padding:26px 20px}
+  .detail .hero .poster{flex-basis:190px;width:150px}
   .detail .hero .metarow,.detail .hero .pills{justify-content:center}
+  .detail .body{padding:22px 20px 28px}
+  .detail .desc{font-size:15.5px}
+  .ph-right{width:100%;justify-content:space-between}
 }
 </style>
 </head>
@@ -364,6 +397,7 @@ main{grid-area:main;padding:28px 36px 100px;width:100%;max-width:1280px;margin:0
 <div class="grain" aria-hidden="true"></div>
 <div class="app">
   <header class="top">
+    <button class="icon-btn btn-burger" id="burger" title="Меню" aria-label="Меню">☰</button>
     <div class="brand">
       <span class="logo-mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -377,7 +411,8 @@ main{grid-area:main;padding:28px 36px 100px;width:100%;max-width:1280px;margin:0
     </div>
     <span class="spacer"></span>
     <input type="search" id="search" placeholder="Поиск по фильмам…">
-    <button class="add-btn" id="addBtn">＋ Добавить фильм</button>
+    <button class="icon-btn" id="randomBtn" title="Случайный фильм">🎲</button>
+    <button class="add-btn" id="addBtn">＋<span class="add-label"> Добавить фильм</span></button>
     <button class="icon-btn" id="themeBtn" title="Тема">🌙</button>
   </header>
 
@@ -408,9 +443,22 @@ main{grid-area:main;padding:28px 36px 100px;width:100%;max-width:1280px;margin:0
     </div>
     <div class="stat-box" id="statBox"></div>
   </aside>
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
 
   <main>
-    <div class="page-head"><h1 id="pageTitle">Все фильмы</h1><span class="sub" id="pageSub"></span></div>
+    <div class="page-head">
+      <h1 id="pageTitle">Все фильмы</h1>
+      <div class="ph-right">
+        <span class="sub" id="pageSub"></span>
+        <select id="sortSel" class="sort-sel" title="Сортировка">
+          <option value="added">Недавно добавленные</option>
+          <option value="year-desc">Сначала новые</option>
+          <option value="year-asc">Сначала старые</option>
+          <option value="rating">По оценке</option>
+          <option value="az">По алфавиту</option>
+        </select>
+      </div>
+    </div>
     <div class="grid" id="grid"></div>
   </main>
 </div>
@@ -584,7 +632,7 @@ MOVIES.forEach(m=>{if(MIG[m.tier])m.tier=MIG[m.tier];if(!TIERS[m.tier])m.tier="h
 function persist(){localStorage.setItem(DKEY,JSON.stringify(MOVIES))}
 persist();
 
-let f={status:"all",tier:"all",genre:"all",q:"",yearFrom:null,yearTo:null};
+let f={status:"all",tier:"all",genre:"all",q:"",yearFrom:null,yearTo:null,sort:"added"};
 const allGenres=()=>[...new Set(MOVIES.flatMap(m=>m.genres))].sort();
 const count=fn=>MOVIES.filter(fn).length;
 
@@ -626,9 +674,20 @@ function visible(){
     (f.yearTo==null||(+m.year)<=f.yearTo)&&
     (!q||m.title.toLowerCase().includes(q)||(m.orig||"").toLowerCase().includes(q)));
 }
+function sortList(list){
+  const a=[...list];
+  if(f.sort==="year-desc")a.sort((x,y)=>(+y.year||0)-(+x.year||0));
+  else if(f.sort==="year-asc")a.sort((x,y)=>(+x.year||0)-(+y.year||0));
+  else if(f.sort==="az")a.sort((x,y)=>x.title.localeCompare(y.title,"ru"));
+  else if(f.sort==="rating")a.sort((x,y)=>{
+    const sx=x.status==="seen"?0:1,sy=y.status==="seen"?0:1;
+    if(sx!==sy)return sx-sy;
+    return TIER_KEYS.indexOf(x.tier)-TIER_KEYS.indexOf(y.tier);});
+  return a; // "added" — порядок массива (новые сверху)
+}
 function render(){
   renderNav();
-  const list=visible(),grid=document.getElementById("grid");
+  const list=sortList(visible()),grid=document.getElementById("grid");
   let t="Все фильмы";
   if(f.genre!=="all")t=f.genre; else if(f.status==="seen")t="Просмотрено";
   else if(f.status==="want")t="Хочу посмотреть"; else if(f.tier==="waiting")t="В ожидании";
@@ -880,7 +939,8 @@ function saveForm(){
 /* ===== События ===== */
 document.addEventListener("click",e=>{
   const nav=e.target.closest(".item");
-  if(nav){const k=nav.dataset.kind,v=nav.dataset.val;f[k]=v;render();return;}
+  if(nav){const k=nav.dataset.kind,v=nav.dataset.val;f[k]=v;
+    document.body.classList.remove("drawer-open");render();return;}
   const card=e.target.closest(".poster-card");
   if(card){openDetail(card.dataset.id);return;}
   const act=e.target.closest("[data-act]");
@@ -905,9 +965,36 @@ document.addEventListener("click",e=>{
 });
 document.getElementById("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeDetail()});
 document.getElementById("formOverlay").addEventListener("click",e=>{if(e.target.id==="formOverlay")closeForm()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDetail();closeForm();}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDetail();closeForm();document.body.classList.remove("drawer-open");}});
 document.getElementById("search").addEventListener("input",e=>{f.q=e.target.value;render()});
 document.getElementById("addBtn").addEventListener("click",()=>openForm(null));
+
+/* ===== Сортировка ===== */
+document.getElementById("sortSel").addEventListener("change",e=>{f.sort=e.target.value;render();});
+
+/* ===== Случайный фильм (из «хочу», иначе из всех) — без повторов ===== */
+let recentRandom=[];
+document.getElementById("randomBtn").addEventListener("click",()=>{
+  const want=MOVIES.filter(m=>m.status==="want");
+  const src=want.length?want:MOVIES;if(!src.length)return;
+  // исключаем недавно выпавшие; если все исчерпаны — сбрасываем историю
+  let pool=src.filter(m=>!recentRandom.includes(m.id));
+  if(!pool.length){recentRandom=[];pool=src;}
+  const m=pool[Math.floor(Math.random()*pool.length)];
+  recentRandom.push(m.id);
+  // помним примерно половину пула (но хотя бы предыдущий)
+  const keep=Math.max(1,Math.min(src.length-1,Math.ceil(src.length/2)));
+  while(recentRandom.length>keep)recentRandom.shift();
+  openDetail(m.id);
+});
+
+/* ===== Мобильное меню (drawer) ===== */
+document.getElementById("burger").addEventListener("click",()=>document.body.classList.toggle("drawer-open"));
+document.getElementById("drawerBackdrop").addEventListener("click",()=>document.body.classList.remove("drawer-open"));
+
+/* ===== PWA service worker ===== */
+if("serviceWorker" in navigator)
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 
 /* ===== Летающие синие шарики ===== */
 (function makeParticles(){
