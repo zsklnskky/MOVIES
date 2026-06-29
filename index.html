@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0f17">
+<title>Моя коллекция фильмов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ─── Дизайн-система (унаследована от Zahar Dashboard) ───────────── */
+:root{
+  --bg:#0e0f17; --bg-soft:#161826; --card:#171a2b; --card-2:#1d2032;
+  --text:#eef0fb; --text-soft:#b9bedb; --text-muted:#7e85a8;
+  --border:#262a40; --border-soft:#1e2236;
+  --shadow:0 1px 3px rgba(0,0,0,.4); --shadow-lg:0 18px 40px rgba(0,0,0,.55);
+  --radius:16px; --radius-sm:11px; --radius-pill:999px;
+  --accent:#a78bfa; --accent-soft:#2a2350;
+  --gold:#ffcb6b; --rose:#ff7eb6; --green:#7ee0a0; --blue:#7ec5ff;
+  --g-comedy:#ffb454; --g-drama:#ff7eb6; --g-melo:#ff7eb6;
+  --g-action:#ff6b6b; --g-scifi:#7ec5ff; --g-thriller:#a78bfa; --g-other:#7ee0a0;
+}
+[data-theme="light"]{
+  --bg:#faf9fc; --bg-soft:#f1f0f7; --card:#ffffff; --card-2:#f6f5fb;
+  --text:#171a2b; --text-soft:#454a66; --text-muted:#8b90ab;
+  --border:#e6e4f0; --border-soft:#efedf6;
+  --shadow:0 1px 3px rgba(20,20,40,.06); --shadow-lg:0 18px 40px rgba(40,30,80,.12);
+  --accent-soft:#ece6ff;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Comfortaa',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:
+    radial-gradient(1100px 540px at 85% -8%,#1e3a8a40 0,transparent 60%),
+    radial-gradient(900px 480px at -8% 6%,#1d4ed833 0,transparent 55%),
+    var(--bg);
+  color:var(--text); font-size:16px; line-height:1.6; min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+input,button,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+
+/* ─── Layout ─────────────────────────────────────────────────────── */
+.app{display:grid;grid-template-columns:288px 1fr;
+     grid-template-areas:"header header" "side main";min-height:100vh}
+header.top{grid-area:header;display:flex;align-items:center;gap:14px;
+  padding:14px 26px;background:color-mix(in srgb,var(--card) 80%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:50}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:18px}
+.brand .dot{width:11px;height:11px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--rose));
+  box-shadow:0 0 14px var(--rose)}
+.brand .meta{font-weight:400;font-size:12.5px;color:var(--text-muted)}
+.top .spacer{flex:1}
+.top input[type="search"]{flex:0 1 280px;border:1px solid var(--border);
+  background:var(--bg);border-radius:var(--radius-pill);padding:9px 16px;
+  color:var(--text);font-size:14px;outline:none;transition:.2s}
+.top input[type="search"]:focus{border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-soft)}
+.icon-btn{width:38px;height:38px;border:1px solid var(--border);background:var(--bg);
+  border-radius:var(--radius-pill);color:var(--text-soft);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;font-size:17px;transition:.15s}
+.icon-btn:hover{background:var(--bg-soft);color:var(--text)}
+.add-btn{display:inline-flex;align-items:center;gap:7px;border:none;cursor:pointer;
+  padding:10px 18px;border-radius:var(--radius-pill);font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,#ff4f7e,#ff2d55);color:#fff;
+  box-shadow:0 10px 22px -10px #ff2d55;transition:.16s}
+.add-btn:hover{transform:translateY(-1px)}
+
+/* ─── Sidebar ────────────────────────────────────────────────────── */
+aside.side{grid-area:side;background:color-mix(in srgb,var(--card) 70%,transparent);
+  border-right:1px solid var(--border);padding:18px 14px 80px;overflow-y:auto;
+  height:calc(100vh - 67px);position:sticky;top:67px}
+.section-title{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.09em;color:var(--text-muted);padding:14px 12px 7px}
+.nav{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+.nav .item{display:flex;align-items:center;gap:11px;padding:10px 13px;
+  border-radius:var(--radius-sm);cursor:pointer;border:1px solid transparent;
+  user-select:none;transition:.15s;font-size:14px;font-weight:600;color:var(--text-soft)}
+.nav .item:hover{background:var(--bg-soft);color:var(--text)}
+.nav .item.active{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}
+.nav .item .swatch{width:13px;height:13px;border-radius:4px;flex:0 0 auto}
+.nav .item .ic{width:18px;text-align:center;font-size:15px}
+.nav .item .name{flex:1}
+.nav .item .count{font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+
+.stat-box{margin:14px 12px;padding:15px;border-radius:var(--radius-sm);background:var(--bg-soft)}
+.stat-box .bar{height:7px;background:var(--border);border-radius:4px;overflow:hidden;margin:9px 0 8px}
+.stat-box .fill{height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--green),var(--blue));transition:width .4s}
+.stat-box .row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-muted)}
+.stat-box .row b{color:var(--text);font-variant-numeric:tabular-nums}
+
+.yearbox{display:flex;align-items:center;gap:7px;margin:4px 12px 9px}
+.yearbox input{width:100%;border:1px solid var(--border);background:var(--bg);color:var(--text);
+  border-radius:9px;padding:8px 8px;font-size:13px;outline:none;text-align:center;
+  font-variant-numeric:tabular-nums}
+.yearbox input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.yearbox span{color:var(--text-muted)}
+.yearbox .icon-btn{width:32px;height:32px;font-size:13px;flex:0 0 auto}
+.year-quick{display:flex;flex-wrap:wrap;gap:6px;margin:0 12px 6px}
+.year-quick button{border:1px solid var(--border);background:var(--bg);color:var(--text-muted);
+  font-size:12px;font-weight:600;padding:6px 11px;border-radius:var(--radius-pill);cursor:pointer}
+.year-quick button:hover{color:var(--text)}
+.year-quick button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}
+
+/* ─── Main ───────────────────────────────────────────────────────── */
+main{grid-area:main;padding:28px 36px 100px;width:100%;max-width:1280px;margin:0 auto}
+.page-head{display:flex;align-items:flex-end;gap:14px;margin:6px 0 22px}
+.page-head h1{font-size:clamp(24px,3.4vw,34px);font-weight:700;margin:0;letter-spacing:-.01em}
+.page-head .sub{color:var(--text-muted);font-size:13.5px;margin-left:auto}
+
+.grid{display:grid;gap:24px 20px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.poster-card{cursor:pointer;display:flex;flex-direction:column;gap:11px;
+  background:linear-gradient(180deg,var(--card),var(--bg-soft));
+  border:1px solid var(--border);border-radius:20px;padding:11px;
+  transition:transform .22s cubic-bezier(.2,.7,.2,1),border-color .22s,box-shadow .22s}
+.poster-card:hover{transform:translateY(-8px);border-color:#3b82f6aa;
+  box-shadow:0 22px 46px -18px #3b82f6cc,0 0 0 1px #3b82f655,
+             inset 0 0 0 1px #ffffff14}
+.poster-wrap{position:relative;aspect-ratio:2/3;border-radius:14px;overflow:hidden;
+  background:var(--card-2);box-shadow:0 10px 26px -14px #000a;border:1px solid var(--border)}
+.poster-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
+.poster-card:hover .poster-wrap img{transform:scale(1.07)}
+/* вспышка-блик при наведении */
+.poster-wrap::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:linear-gradient(115deg,transparent 32%,#ffffff66 48%,#cfe4ff55 52%,transparent 68%);
+  transform:translateX(-130%) skewX(-12deg);opacity:0}
+.poster-card:hover .poster-wrap::after{animation:sheen .75s ease}
+@keyframes sheen{0%{transform:translateX(-130%) skewX(-12deg);opacity:1}
+  100%{transform:translateX(130%) skewX(-12deg);opacity:1}}
+.poster-wrap .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:40px;opacity:.5}
+.poster-wrap .grad{position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,#000a 100%)}
+.tier-badge{position:absolute;top:9px;left:9px;font-size:10px;font-weight:700;
+  padding:4px 9px;border-radius:var(--radius-pill);color:#1a1205;
+  text-transform:uppercase;letter-spacing:.5px;z-index:2}
+.seen-flag{position:absolute;top:9px;right:9px;width:25px;height:25px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:13px;z-index:2;
+  background:#0009;backdrop-filter:blur(3px)}
+.poster-wrap .yr{position:absolute;left:10px;bottom:9px;font-size:12px;font-weight:600;
+  color:#fff;text-shadow:0 1px 6px #000;z-index:2}
+.poster-meta{padding:0 3px 3px}
+.poster-meta .title{font-size:16px;font-weight:700;line-height:1.3;color:var(--text)}
+.poster-meta .gtags{font-size:12.5px;color:var(--text-soft);margin-top:4px}
+.poster-meta .st{font-size:12.5px;font-weight:700;margin-top:6px;display:inline-block}
+.st.seen{color:var(--green)} .st.want{color:var(--gold)}
+.empty{grid-column:1/-1;text-align:center;color:var(--text-muted);padding:70px 0;font-size:15px}
+
+/* ─── Overlay (общий) ────────────────────────────────────────────── */
+.overlay{position:fixed;inset:0;z-index:100;display:none;
+  background:#070810cc;backdrop-filter:blur(8px);
+  align-items:flex-start;justify-content:center;padding:40px 18px;overflow-y:auto}
+.overlay.open{display:flex}
+.close{position:absolute;top:18px;right:18px;z-index:5;width:46px;height:46px;border-radius:50%;
+  border:none;background:#00000099;color:#fff;font-size:22px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:.16s}
+.close:hover{background:#000;transform:rotate(90deg)}
+.close:hover{background:#000000bb}
+
+/* ─── Detail ─────────────────────────────────────────────────────── */
+.detail{position:relative;width:min(1080px,100%);border-radius:26px;overflow:hidden;
+  background:var(--card);border:1px solid #3b82f655;
+  box-shadow:0 30px 80px -20px #000,0 0 0 1px #3b82f633,0 0 60px -20px #3b82f6aa;
+  animation:pop .28s cubic-bezier(.2,.7,.2,1)}
+@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1}}
+.detail .hero{position:relative;display:flex;gap:34px;padding:32px 38px;align-items:center}
+.detail .hero .bd{position:absolute;inset:0;background-size:cover;background-position:center top;
+  filter:blur(26px) brightness(.4) saturate(1.2);transform:scale(1.15);z-index:0}
+.detail .hero .bd::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,#0008,var(--card) 96%)}
+.detail .hero .poster{position:relative;z-index:1;flex:0 0 250px;aspect-ratio:2/3;
+  border-radius:16px;overflow:hidden;box-shadow:0 24px 50px -16px #000d;border:1px solid #ffffff2e;
+  background:linear-gradient(135deg,#1e3a8a,#23203a)}
+.detail .hero .poster img{width:100%;height:100%;object-fit:cover;display:block}
+.detail .hero .info{position:relative;z-index:1;flex:1;color:#fff}
+.detail .hero .crumbs{font-size:14px;color:#ffffffd0;margin-bottom:13px;letter-spacing:.02em;font-weight:600}
+.detail .hero h2{font-size:clamp(32px,4.6vw,52px);font-weight:800;margin:0 0 16px;
+  line-height:1.05;letter-spacing:-.01em;text-shadow:0 2px 22px #000b}
+.detail .hero .metarow{display:flex;flex-wrap:wrap;align-items:center;gap:12px;
+  font-size:16px;font-weight:600;color:#fff;margin-bottom:16px}
+.detail .hero .score{font-weight:700;font-size:18px;color:var(--gold)}
+.detail .hero .dot-sep{width:5px;height:5px;border-radius:50%;background:#fff8}
+.detail .hero .pills{display:flex;flex-wrap:wrap;gap:9px}
+.pill{font-size:13.5px;font-weight:600;padding:7px 15px;border-radius:var(--radius-pill);
+  background:#ffffff22;color:#fff;border:1px solid #ffffff33;backdrop-filter:blur(4px)}
+.detail .body{padding:28px 38px 36px;background:var(--card)}
+.detail .desc{font-size:17px;line-height:1.8;color:var(--text);margin:0 0 26px;max-width:780px}
+.detail .controls{display:flex;flex-wrap:wrap;gap:11px;align-items:center}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;
+  border-radius:var(--radius-pill);border:1px solid var(--border);background:var(--card-2);
+  color:var(--text);font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:.16s}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg,#ff4f7e,#ff2d55);color:#fff;border:none;
+  box-shadow:0 10px 24px -8px #ff2d55}
+.btn.go{background:linear-gradient(135deg,var(--green),#4fb87a);color:#06210f;border:none}
+.btn.ghost{background:transparent}
+.btn.danger{color:#ff8a8a;border-color:#ff8a8a55}
+.btn.danger:hover{background:#ff5a5a1a;border-color:#ff8a8a}
+.btn.sm{padding:9px 14px;font-size:13px}
+.detail .controls .btn{padding:14px 26px;font-size:15px}
+.detail .controls .btn.sm{padding:12px 18px;font-size:14px}
+.detail .controls .tsel{gap:8px;margin-top:6px}
+.detail .controls .tsel button{padding:11px 16px;font-size:13.5px}
+.tsel{display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:4px}
+.tsel button{font-size:12px;font-weight:700;padding:9px 13px;border-radius:var(--radius-pill);
+  border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer}
+.tsel button.on{color:#1a1205}
+.rate-hint{font-size:12.5px;color:var(--text-muted);line-height:1.5;flex-basis:100%;
+  display:flex;align-items:center;gap:6px}
+
+/* ─── Форма добавления ───────────────────────────────────────────── */
+.formbox{position:relative;width:min(620px,100%);border-radius:22px;
+  background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow-lg);
+  padding:28px 30px 30px;animation:pop .25s ease}
+.formbox h2{margin:0 0 4px;font-size:23px;font-weight:700}
+.formbox .hint{color:var(--text-muted);font-size:13px;margin:0 0 20px}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--text-soft);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--border);
+  background:var(--bg);color:var(--text);border-radius:11px;padding:11px 13px;
+  font-size:14px;outline:none;transition:.18s}
+.field textarea{resize:vertical;min-height:84px;line-height:1.55}
+.field input:focus,.field textarea:focus,.field select:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.field-row{display:flex;gap:12px}.field-row>*{flex:1}
+.fetch-row{display:flex;gap:10px;align-items:flex-end}
+.fetch-row .field{flex:1;margin-bottom:0}
+.fetch-status{font-size:12.5px;margin:7px 2px 12px;min-height:16px;line-height:1.4}
+.fetch-status.err{color:#ff8a8a}.fetch-status.ok{color:var(--green)}.fetch-status.load{color:var(--blue)}
+.preview-poster{width:84px;aspect-ratio:2/3;border-radius:9px;object-fit:cover;
+  border:1px solid var(--border);background:var(--card-2);display:none}
+.preview-poster.show{display:block}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--border);background:var(--bg);color:var(--text-muted);
+  padding:9px 14px;border-radius:var(--radius-pill);font-size:13px;font-weight:600;cursor:pointer}
+.seg button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--text)}
+.form-actions{display:flex;gap:10px;margin-top:22px}
+.form-actions .btn{flex:1;justify-content:center}
+
+/* ─── Бренд-вордмарк ─────────────────────────────────────────────── */
+.brand{gap:12px}
+.logo-mark{width:38px;height:38px;border-radius:11px;flex:0 0 auto;display:flex;
+  align-items:center;justify-content:center;color:#fff;
+  background:linear-gradient(135deg,#3b82f6,#60a5fa,#a78bfa,#3b82f6);
+  background-size:220% 220%;
+  box-shadow:0 8px 22px -8px #3b82f6;
+  animation:logoFloat 5s ease-in-out infinite, logoHue 7s linear infinite}
+@keyframes logoFloat{0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-3px) rotate(-4deg)}}
+@keyframes logoHue{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+.logo-mark svg{width:21px;height:21px;animation:logoGlow 3.2s ease-in-out infinite}
+@keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 0 #fff0)}50%{filter:drop-shadow(0 0 4px #fffc)}}
+.logo-text{display:flex;flex-direction:column;line-height:1.05;font-weight:700;font-size:20px;
+  letter-spacing:.16em;
+  background:linear-gradient(90deg,var(--gold),var(--rose),var(--accent),var(--blue),var(--gold));
+  background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:logoText 8s linear infinite}
+@keyframes logoText{0%{background-position:0 0}100%{background-position:220% 0}}
+
+/* летающие еле заметные синие шарики */
+.particles{position:absolute;inset:0}
+.particle{position:absolute;bottom:-40px;border-radius:50%;
+  background:radial-gradient(circle at 32% 30%,#cfe4ff,#3b82f6 70%);
+  filter:blur(.6px);opacity:0;will-change:transform,opacity;
+  animation:floaty linear infinite}
+@keyframes floaty{
+  0%{transform:translateY(0) translateX(0) scale(.6);opacity:0}
+  12%{opacity:var(--o)}
+  88%{opacity:var(--o)}
+  100%{transform:translateY(-108vh) translateX(var(--dx)) scale(1.05);opacity:0}}
+.logo-text .meta{font-weight:500;font-size:11px;letter-spacing:.12em;
+  -webkit-text-fill-color:var(--text-muted);color:var(--text-muted);margin-top:3px}
+
+/* ─── Sidebar accordion ──────────────────────────────────────────── */
+.acc{border-bottom:1px solid var(--border-soft)}
+.acc-head{width:100%;display:flex;align-items:center;justify-content:space-between;
+  background:none;border:none;cursor:pointer;color:var(--text-muted);
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;
+  padding:14px 12px 11px;transition:color .15s}
+.acc-head:hover{color:var(--text-soft)}
+.acc-head .chev{transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.acc-body{display:grid;grid-template-rows:1fr;
+  transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1),opacity .26s}
+.acc-body>div{overflow:hidden;min-height:0}
+.acc.collapsed .acc-body{grid-template-rows:0fr;opacity:0}
+.acc.collapsed .acc-head .chev{transform:rotate(-90deg)}
+.acc-body .nav,.acc-body .yearbox{margin-top:0}
+.acc-body{padding-bottom:6px}
+
+/* ─── Motion (framer-style) ──────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+.poster-card{animation:fadeUp .44s cubic-bezier(.2,.7,.2,1) both}
+.poster-card:active{transform:scale(.97)}
+.btn:active,.add-btn:active,.icon-btn:active,.seg button:active,.tsel button:active,
+.nav .item:active,.year-quick button:active{transform:scale(.96)}
+.nav .item{transition:background .15s,border-color .15s,transform .12s}
+.tier-badge{transition:transform .2s}
+.poster-card:hover .tier-badge{transform:translateY(-2px)}
+.brand .dot{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--rose)}50%{box-shadow:0 0 14px 2px var(--rose)}}
+
+/* ─── Анимированный сине-белый фон + вотермарк «КИНОТЕКА» ────────── */
+.bg-fx{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.app{position:relative;z-index:1}
+.bg-grad{position:absolute;inset:-25%;filter:blur(50px);
+  background:
+    radial-gradient(38% 38% at 20% 30%,#2563eb66 0,transparent 70%),
+    radial-gradient(42% 42% at 80% 20%,#60a5fa55 0,transparent 70%),
+    radial-gradient(46% 46% at 62% 78%,#ffffff26 0,transparent 70%),
+    radial-gradient(40% 40% at 14% 84%,#3b82f655 0,transparent 70%);
+  animation:bgflow 20s ease-in-out infinite alternate}
+@keyframes bgflow{
+  0%{transform:translate(0,0) scale(1)}
+  50%{transform:translate(4%,-3%) scale(1.12)}
+  100%{transform:translate(-4%,3%) scale(1.06)}}
+.bg-word{position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-8deg);white-space:nowrap;
+  font-weight:800;font-size:23vw;letter-spacing:.04em;opacity:.10;
+  background:linear-gradient(100deg,#1e3a8a 0%,#3b82f6 22%,#ffffff 50%,#60a5fa 78%,#1e3a8a 100%);
+  background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shimmer 9s linear infinite}
+@keyframes shimmer{0%{background-position:0 0}100%{background-position:220% 0}}
+[data-theme="light"] .bg-word{opacity:.08;
+  background:linear-gradient(100deg,#1e3a8a 0%,#3b82f6 30%,#93c5fd 50%,#3b82f6 70%,#1e3a8a 100%);
+  -webkit-background-clip:text;background-clip:text}
+[data-theme="light"] .bg-grad{opacity:.6}
+.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.055;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size:160px 160px;animation:grainShift 1.1s steps(4) infinite}
+[data-theme="light"] .grain{opacity:.035}
+@keyframes grainShift{0%{background-position:0 0}25%{background-position:-22px 12px}
+  50%{background-position:16px -18px}75%{background-position:-12px 22px}100%{background-position:0 0}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important}
+}
+
+@media(max-width:880px){
+  .app{grid-template-columns:1fr;grid-template-areas:"header" "main"}
+  aside.side{display:none}
+  .logo-text .meta{display:none}
+  .detail .hero{flex-direction:column;align-items:center;text-align:center}
+  .detail .hero .metarow,.detail .hero .pills{justify-content:center}
+}
+</style>
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true">
+  <div class="bg-grad"></div>
+  <div class="bg-word">КИНОТЕКА</div>
+  <div class="particles" id="particles"></div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2.5" y="4.5" width="19" height="15" rx="2.5"></rect>
+          <path d="M7 4.5v15M17 4.5v15M2.5 9.5h4.5M2.5 14.5h4.5M17 9.5h4.5M17 14.5h4.5"></path>
+        </svg>
+      </span>
+      <span class="logo-text">КИНОТЕКА<span class="meta">личная фильмотека</span></span>
+      <span class="dot" style="position:absolute;left:-9999px"></span>
+    </div>
+    <span class="spacer"></span>
+    <input type="search" id="search" placeholder="Поиск по фильмам…">
+    <button class="add-btn" id="addBtn">＋ Добавить фильм</button>
+    <button class="icon-btn" id="themeBtn" title="Тема">🌙</button>
+  </header>
+
+  <aside class="side">
+    <div class="acc" data-acc="status">
+      <button class="acc-head"><span>Подборки</span><svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <div class="acc-body"><div><div class="nav" id="navStatus"></div></div></div>
+    </div>
+    <div class="acc" data-acc="tier">
+      <button class="acc-head"><span>Рейтинг</span><svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <div class="acc-body"><div><div class="nav" id="navTier"></div></div></div>
+    </div>
+    <div class="acc" data-acc="genre">
+      <button class="acc-head"><span>Жанры</span><svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <div class="acc-body"><div><div class="nav" id="navGenre"></div></div></div>
+    </div>
+    <div class="acc" data-acc="year">
+      <button class="acc-head"><span>Год выпуска</span><svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></button>
+      <div class="acc-body"><div>
+        <div class="yearbox">
+          <input type="number" id="yearFrom" placeholder="от" inputmode="numeric">
+          <span>—</span>
+          <input type="number" id="yearTo" placeholder="до" inputmode="numeric">
+          <button class="icon-btn" id="yearReset" title="Сбросить год">✕</button>
+        </div>
+        <div class="year-quick" id="yearQuick"></div>
+      </div></div>
+    </div>
+    <div class="stat-box" id="statBox"></div>
+  </aside>
+
+  <main>
+    <div class="page-head"><h1 id="pageTitle">Все фильмы</h1><span class="sub" id="pageSub"></span></div>
+    <div class="grid" id="grid"></div>
+  </main>
+</div>
+
+<div class="overlay" id="overlay"><div class="detail" id="detail"></div></div>
+<div class="overlay" id="formOverlay"><div class="formbox" id="formBox"></div></div>
+
+<script>
+/* ===== РЕЙТИНГОВАЯ ШКАЛА (лучшее → худшее) ===== */
+const TIERS={
+  shedevr:{label:"Шедевр",     color:"#ffcb6b", ic:"🏆"},
+  otlichno:{label:"Отличные",  color:"#ff9e5e", ic:"🔥"},
+  horoshie:{label:"Хорошие",   color:"#7ee0a0", ic:"👍"},
+  normalno:{label:"На один раз",color:"#aeb4d4", ic:"😐"},
+  slaboe:{label:"Слабоватые",  color:"#7ec5ff", ic:"💤"},
+  ploho:{label:"Не советую",   color:"#ff7a7a", ic:"🗑️"}
+};
+const TIER_KEYS=Object.keys(TIERS);
+const STATUS={seen:{label:"Просмотрено",ic:"✓"},want:{label:"Хочу посмотреть",ic:"🔖"}};
+const WAITING={label:"В ожидании",color:"#9aa0c0",ic:"⏳"};
+// оценка показывается только у просмотренных; у «хочу» — В ожидании
+const rateOf=m=>m.status==="seen"?(TIERS[m.tier]||WAITING):WAITING;
+const GENRE_COLOR={"Комедия":"#ffb454","Мелодрама":"#ff7eb6","Драма":"#ff7eb6","Боевик":"#ff6b6b",
+  "Фантастика":"#7ec5ff","Триллер":"#a78bfa","Ужасы":"#9b8cff","Приключения":"#7ee0a0",
+  "Детектив":"#9aa0c0","Мультфильм":"#ffd166","Фэнтези":"#c08bfa","Криминал":"#ff8c6b"};
+function gcolor(g){return GENRE_COLOR[g]||"#7ee0a0"}
+
+/* ===== ДАННЫЕ (seed → localStorage) ===== */
+const SEED=[
+  {id:"ukroshenie-1980",title:"Укрощение строптивого",orig:"Il bisbetico domato",year:1980,
+   country:"Италия",runtime:"1 ч 40 мин",age:"12+",score:7.9,genres:["Комедия","Мелодрама"],
+   status:"seen",tier:"shedevr",poster:"posters/ukroshenie.jpg",
+   desc:"Суровый фермер-мизантроп прячет сердце за колючками — пока в его тишину не врывается обворожительная гостья. Поединок двух упрямцев, где гордость тает, а любовь побеждает без единого выстрела. Челентано во всём блеске.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Укрощение строптивого 1980")},
+  {id:"vlublyonniy-1981",title:"Безумно влюблённый",orig:"Innamorato pazzo",year:1981,
+   country:"Италия",runtime:"1 ч 35 мин",age:"12+",score:7.8,genres:["Комедия","Мелодрама"],
+   status:"want",tier:"otlichno",poster:"posters/vlublyonniy.jpg",
+   desc:"Простой шофёр теряет голову от настоящей принцессы — и пускается в безумную погоню за любовью сквозь пропасть сословий. Лёгкая, искрящаяся сказка о страсти, которой плевать на этикет и титулы.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Безумно влюблённый 1981")},
+
+  {id:"tuz-1981",title:"Туз",orig:"Asso",year:1981,country:"Италия",runtime:"1 ч 35 мин",age:"12+",score:7.0,
+   genres:["Комедия","Фэнтези","Мелодрама"],status:"want",tier:"otlichno",poster:"posters/tuz.jpg",
+   desc:"Шулер экстра-класса гибнет в день собственной свадьбы — и возвращается призраком, чтобы из-за плеча оберегать молодую жену от соперников и собственной ревности. Челентано играет любовь сильнее смерти — с фирменной грустинкой под маской балагура.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Туз Asso 1981")},
+
+  {id:"bluff-1976",title:"Блеф",orig:"Bluff storia di truffe e di imbroglioni",year:1976,country:"Италия",runtime:"1 ч 40 мин",age:"12+",score:8.0,
+   genres:["Комедия","Криминал"],status:"want",tier:"shedevr",poster:"posters/bluff.jpg",
+   desc:"Два гениальных афериста — дерзкий проныра и матёрый старик-мошенник — затевают головокружительную партию обманов, где каждый блефует против каждого. Челентано и Энтони Куинн купаются в авантюрном азарте: подмены, побеги, двойное дно и улыбка до ушей.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Блеф Bluff 1976")},
+
+  {id:"bingo-bongo-1982",title:"Бинго-Бонго",orig:"Bingo Bongo",year:1982,country:"Италия",runtime:"1 ч 40 мин",age:"12+",score:7.3,
+   genres:["Комедия"],status:"want",tier:"horoshie",poster:"posters/bingo-bongo.jpg",
+   desc:"Дитя джунглей, выросшее среди обезьян, попадает в шумный Милан — и наивным звериным взглядом обнажает весь абсурд «цивилизованных» людей. Челентано хохмит телом и гримасой, превращая дикаря в самого человечного героя города.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Бинго-Бонго 1982")},
+
+  {id:"shrew-1967",title:"Укрощение строптивой",orig:"The Taming of the Shrew",year:1967,country:"США / Италия",runtime:"2 ч 02 мин",age:"12+",score:7.4,
+   genres:["Комедия","Мелодрама"],status:"want",tier:"otlichno",poster:"posters/shrew-1967.jpg",
+   desc:"Роскошная и шумная экранизация Шекспира от Дзеффирелли: дерзкий охотник за приданым берётся укротить самую вздорную невесту Падуи. Элизабет Тейлор и Ричард Бёртон сшибаются искрами настоящей страсти — пыль, костюмы, хохот и любовь как поединок равных.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Укрощение строптивой 1967")},
+
+  {id:"overboard-1987",title:"За бортом",orig:"Overboard",year:1987,country:"США",runtime:"1 ч 52 мин",age:"12+",score:6.9,
+   genres:["Комедия","Мелодрама"],status:"want",tier:"horoshie",poster:"posters/overboard.jpg",
+   desc:"Избалованная богачка теряет память, упав за борт яхты, — и хитрый плотник выдаёт её за свою жену с оравой детей. Из мести рождается дом, из обмана — нежность. Голди Хоун и Курт Расселл играют о том, как чужая жизнь делает нас настоящими.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("За бортом Overboard 1987")},
+
+  {id:"10things-1999",title:"10 причин моей ненависти",orig:"10 Things I Hate About You",year:1999,country:"США",runtime:"1 ч 37 мин",age:"12+",score:7.7,
+   genres:["Комедия","Мелодрама"],status:"want",tier:"otlichno",poster:"posters/10things.jpg",
+   desc:"Дерзкая бунтарка не желает знать парней — а младшей сестре нельзя на свидания, пока старшая одна. И вот загадочного хулигана подкупают, чтобы он её покорил. Подростковый Шекспир, где колкости искрят, а ненависть подозрительно похожа на любовь.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("10 причин моей ненависти 1999")},
+
+  {id:"scream-7",title:"Крик 7",orig:"Scream 7",year:2026,country:"США",runtime:"—",
+   genres:["Ужасы","Триллер"],status:"seen",tier:"horoshie",poster:"posters/scream7.jpg",
+   desc:"Новый виток кровавой игры в маски: знакомые лица вновь под прицелом, когда Призрачное Лицо точит нож. Слэшер о том, что прошлое не отпускает, а звонок может раздаться в любую секунду.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Крик 7")},
+
+  {id:"marty-supreme",title:"Марти Великолепный",orig:"Marty Supreme",year:2025,country:"США",runtime:"2 ч 15 мин",
+   genres:["Драма"],status:"seen",tier:"otlichno",poster:"posters/marty.jpg",
+   desc:"Одержимый молодой талант настольного тенниса рвётся к величию, не считаясь ни с кем и ни с чем. Тимоти Шаламе играет амбицию как болезнь и как дар — азарт, который сжигает дотла.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Марти Великолепный Marty Supreme")},
+
+  {id:"28-years-later",title:"28 лет спустя",orig:"28 Years Later",year:2025,country:"Великобритания",runtime:"1 ч 55 мин",
+   genres:["Ужасы","Триллер","Драма"],status:"seen",tier:"otlichno",poster:"posters/28years.jpg",
+   desc:"Спустя десятилетия после вспышки вируса ярости выжившие держатся на укреплённом острове — пока вылазка на материк не открывает, как чудовищно изменился заражённый мир. Дэнни Бойл возвращает свой апокалипсис.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("28 лет спустя")},
+
+  {id:"ubezhishe-2025",title:"Убежище",orig:"",year:2025,country:"",runtime:"—",
+   genres:["Триллер"],status:"seen",tier:"normalno",poster:"",
+   desc:"Триллер 2025 года. Постер и подробное описание пока не подтянулись автоматически — открой «✏️ Изменить» и нажми «Подтянуть» или вставь данные вручную.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Убежище 2025")},
+
+  {id:"avatar-fire-ash",title:"Аватар: Пламя и пепел",orig:"Avatar: Fire and Ash",year:2025,country:"США",runtime:"3 ч 12 мин",
+   genres:["Фантастика","Приключения","Боевик"],status:"seen",tier:"otlichno",poster:"posters/avatar-fire.jpg",
+   desc:"Третья сага о Пандоре: Джейк и Нейтири встречают новый, яростный клан На'ви — Народ Пепла. Кэмерон поднимает ставки в войне за выживание, где огонь приходит на смену воде.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Аватар Пламя и пепел")},
+
+  {id:"fast-1",title:"Форсаж",orig:"The Fast and the Furious",year:2001,country:"США",runtime:"1 ч 46 мин",
+   genres:["Боевик","Криминал"],status:"seen",tier:"otlichno",poster:"posters/fast1.jpg",
+   desc:"Уличные гонки, угоны фур и коп под прикрытием, который влюбляется в мир, что обязан разрушить. С этого взревевшего мотора началась легенда о семье и скорости.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Форсаж 2001")},
+
+  {id:"fast-2",title:"Двойной форсаж",orig:"2 Fast 2 Furious",year:2003,country:"США",runtime:"1 ч 47 мин",
+   genres:["Боевик","Криминал"],status:"seen",tier:"horoshie",poster:"posters/fast2.jpg",
+   desc:"Брайан вне закона мчит в солнечный Майами и сколачивает новую команду для дерзкой аферы под прикрытием. Неон, тюнинг и адреналин на полную.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Двойной форсаж 2003")},
+
+  {id:"fast-3",title:"Тройной форсаж: Токийский дрифт",orig:"The Fast and the Furious: Tokyo Drift",year:2006,country:"США",runtime:"1 ч 44 мин",
+   genres:["Боевик","Драма"],status:"seen",tier:"horoshie",poster:"posters/fast3.jpg",
+   desc:"Американский школьник проваливается в подпольный мир токийского дрифта, где боком входят и в поворот, и в чужую культуру. Самая стильная и одинокая глава саги.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Тройной форсаж Токийский дрифт")},
+
+  {id:"fast-4",title:"Форсаж 4",orig:"Fast & Furious",year:2009,country:"США",runtime:"1 ч 47 мин",
+   genres:["Боевик","Криминал"],status:"seen",tier:"horoshie",poster:"posters/fast4.jpg",
+   desc:"Старая команда снова в сборе: месть, картель и гонки через границу. Доминик и Брайан возвращают саге её гоночное сердце.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Форсаж 4 2009")},
+
+  {id:"fast-5",title:"Форсаж 5",orig:"Fast Five",year:2011,country:"США",runtime:"2 ч 10 мин",
+   genres:["Боевик","Криминал"],status:"seen",tier:"shedevr",poster:"posters/fast5.jpg",
+   desc:"Рио, ограбление века и банковский сейф, который тащат через весь город на двух Dodge. Поворот от гонок к большому хайст-боевику — вершина серии.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Форсаж 5 2011")},
+
+  {id:"fast-6",title:"Форсаж 6",orig:"Fast & Furious 6",year:2013,country:"США",runtime:"2 ч 10 мин",
+   genres:["Боевик","Криминал"],status:"seen",tier:"otlichno",poster:"posters/fast6.jpg",
+   desc:"Команду вербуют против банды наёмников, и ради семьи Доминик бросает вызов танку и самолёту. Гонка длиной во взлётную полосу.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Форсаж 6 2013")},
+
+  {id:"fast-7",title:"Форсаж 7",orig:"Furious 7",year:2015,country:"США",runtime:"2 ч 17 мин",
+   genres:["Боевик","Криминал"],status:"seen",tier:"shedevr",poster:"posters/fast7.jpg",
+   desc:"Мстительный брат-убийца охотится на команду, а машины прыгают между небоскрёбами. Прощание с Полом Уокером, от которого щемит сердце.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Форсаж 7 2015")},
+
+  {id:"fast-8",title:"Форсаж 8",orig:"The Fate of the Furious",year:2017,country:"США",runtime:"2 ч 16 мин",
+   genres:["Боевик","Криминал"],status:"seen",tier:"horoshie",poster:"posters/fast8.jpg",
+   desc:"Доминика шантажом переманивает кибертеррористка, и семья впервые идёт против своего вожака. Армия взломанных машин и лёд Арктики.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Форсаж 8 2017")},
+
+  {id:"fast-9",title:"Форсаж 9",orig:"F9",year:2021,country:"США",runtime:"2 ч 23 мин",
+   genres:["Боевик","Криминал"],status:"seen",tier:"normalno",poster:"posters/fast9.jpg",
+   desc:"Из тени выходит брат Доминика, а сага буквально выезжает в космос. Абсурд на максималках — но семья по-прежнему крепко держит руль.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Форсаж 9 2021")},
+
+  {id:"fast-10",title:"Форсаж 10",orig:"Fast X",year:2023,country:"США",runtime:"2 ч 21 мин",
+   genres:["Боевик","Криминал"],status:"seen",tier:"horoshie",poster:"posters/fast10.jpg",
+   desc:"Сын погибшего наркобарона мстит расчётливо и жестоко, загоняя семью в угол по всему миру. Самый личный и мрачный заезд саги.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Форсаж 10 2023")},
+
+  {id:"hobbs-shaw",title:"Хоббс и Шоу",orig:"Hobbs & Shaw",year:2019,country:"США",runtime:"2 ч 17 мин",
+   genres:["Боевик","Комедия"],status:"seen",tier:"horoshie",poster:"posters/hobbs-shaw.jpg",
+   desc:"Громила-агент и обаятельный нарушитель закона вынуждены работать в паре против кибер-усиленного злодея. Спин-офф, где харизма спорит с кулаками.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Хоббс и Шоу 2019")},
+
+  {id:"silent-hill-2006",title:"Сайлент Хилл",orig:"Silent Hill",year:2006,country:"США / Канада",runtime:"2 ч 05 мин",
+   genres:["Ужасы","Триллер"],status:"seen",tier:"otlichno",poster:"posters/silenthill.jpg",
+   desc:"Мать ищет приёмную дочь в проклятом городке, где сквозь пепельный туман проступает другая, кошмарная реальность. Экранизация культовой игры — холод, ржавчина и вой сирены.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Сайлент Хилл 2006")},
+
+  {id:"return-silent-hill",title:"Возвращение в Сайлент Хилл",orig:"Return to Silent Hill",year:2026,country:"США",runtime:"—",
+   genres:["Ужасы","Триллер"],status:"seen",tier:"horoshie",poster:"posters/return-silenthill.jpg",
+   desc:"Человек возвращается в туманный город за потерянной любовью — и вновь проваливается в его живой кошмар. Новая экранизация от режиссёра оригинального фильма.",
+   where:"https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent("Возвращение в Сайлент Хилл")}
+];
+const DKEY="movieData_v5";
+function loadMovies(){
+  const raw=localStorage.getItem(DKEY);
+  if(!raw){localStorage.setItem(DKEY,JSON.stringify(SEED));return JSON.parse(JSON.stringify(SEED));}
+  try{return JSON.parse(raw)}catch(e){return JSON.parse(JSON.stringify(SEED))}
+}
+let MOVIES=loadMovies();
+// миграция старых тиров
+const MIG={top:"shedevr",best:"otlichno",good:"horoshie"};
+MOVIES.forEach(m=>{if(MIG[m.tier])m.tier=MIG[m.tier];if(!TIERS[m.tier])m.tier="horoshie";});
+function persist(){localStorage.setItem(DKEY,JSON.stringify(MOVIES))}
+persist();
+
+let f={status:"all",tier:"all",genre:"all",q:"",yearFrom:null,yearTo:null};
+const allGenres=()=>[...new Set(MOVIES.flatMap(m=>m.genres))].sort();
+const count=fn=>MOVIES.filter(fn).length;
+
+/* ===== Sidebar ===== */
+function renderNav(){
+  document.getElementById("navStatus").innerHTML=
+    navItem("🎬","Все фильмы","all",f.status==="all",MOVIES.length,"status")+
+    navItem(STATUS.seen.ic,"Просмотрено","seen",f.status==="seen",count(m=>m.status==="seen"),"status")+
+    navItem(STATUS.want.ic,"Хочу посмотреть","want",f.status==="want",count(m=>m.status==="want"),"status");
+  document.getElementById("navTier").innerHTML=
+    navItem("≡","Любой рейтинг","all",f.tier==="all",MOVIES.length,"tier")+
+    TIER_KEYS.map(k=>navItem(TIERS[k].ic,TIERS[k].label,k,f.tier===k,count(m=>m.status==="seen"&&m.tier===k),"tier")).join("")+
+    navItem(WAITING.ic,WAITING.label,"waiting",f.tier==="waiting",count(m=>m.status==="want"),"tier");
+  document.getElementById("navGenre").innerHTML=
+    navItem("◎","Все жанры","all",f.genre==="all",MOVIES.length,"genre")+
+    allGenres().map(g=>navSwatch(g,f.genre===g,count(m=>m.genres.includes(g)))).join("");
+  const seen=count(m=>m.status==="seen"),total=MOVIES.length,pct=total?Math.round(seen/total*100):0;
+  document.getElementById("statBox").innerHTML=
+    `<div class="row"><span>Просмотрено</span><b>${seen} / ${total}</b></div>
+     <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+     <div class="row"><span>${pct}% коллекции</span><b>${total-seen} в планах</b></div>`;
+}
+const navItem=(ic,name,val,active,n,kind)=>
+  `<div class="item ${active?'active':''}" data-kind="${kind}" data-val="${val}">
+    <span class="ic">${ic}</span><span class="name">${name}</span><span class="count">${n}</span></div>`;
+const navSwatch=(g,active,n)=>
+  `<div class="item ${active?'active':''}" data-kind="genre" data-val="${esc(g)}">
+    <span class="swatch" style="background:${gcolor(g)}"></span><span class="name">${esc(g)}</span>
+    <span class="count">${n}</span></div>`;
+
+/* ===== Сетка ===== */
+function visible(){
+  const q=f.q.trim().toLowerCase();
+  return MOVIES.filter(m=>
+    (f.status==="all"||m.status===f.status)&&
+    (f.tier==="all"||(f.tier==="waiting"?m.status==="want":(m.status==="seen"&&m.tier===f.tier)))&&
+    (f.genre==="all"||m.genres.includes(f.genre))&&
+    (f.yearFrom==null||(+m.year)>=f.yearFrom)&&
+    (f.yearTo==null||(+m.year)<=f.yearTo)&&
+    (!q||m.title.toLowerCase().includes(q)||(m.orig||"").toLowerCase().includes(q)));
+}
+function render(){
+  renderNav();
+  const list=visible(),grid=document.getElementById("grid");
+  let t="Все фильмы";
+  if(f.genre!=="all")t=f.genre; else if(f.status==="seen")t="Просмотрено";
+  else if(f.status==="want")t="Хочу посмотреть"; else if(f.tier==="waiting")t="В ожидании";
+  else if(f.tier!=="all")t=TIERS[f.tier].label;
+  document.getElementById("pageTitle").textContent=t;
+  let sub=list.length+" "+plural(list.length,"фильм","фильма","фильмов");
+  if(f.yearFrom!=null||f.yearTo!=null)sub+=" · "+(f.yearFrom??"…")+"–"+(f.yearTo??"…");
+  document.getElementById("pageSub").textContent=sub;
+  grid.innerHTML=list.length?list.map((m,i)=>cardHTML(m,i)).join(""):`<div class="empty">Ничего не найдено. Добавь фильм кнопкой «＋ Добавить».</div>`;
+}
+function plural(n,a,b,c){n=Math.abs(n)%100;const n1=n%10;
+  if(n>10&&n<20)return c;if(n1>1&&n1<5)return b;if(n1===1)return a;return c}
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function cardHTML(m,i){
+  const t=rateOf(m),s=STATUS[m.status];
+  const img=m.poster
+    ? `<img src="${esc(m.poster)}" alt="${esc(m.title)}" loading="lazy" onerror="this.remove()">`
+    : `<div class="ph">🎬</div>`;
+  return `<div class="poster-card" data-id="${m.id}" style="animation-delay:${Math.min((i||0)*35,520)}ms">`+`
+    <div class="poster-wrap">
+      <span class="tier-badge" style="background:${t.color}">${t.ic} ${t.label}</span>
+      ${m.status==="seen"?`<span class="seen-flag" title="Просмотрено">✓</span>`:""}
+      ${img}<div class="grad"></div><span class="yr">${esc(m.year||"")}</span>
+    </div>
+    <div class="poster-meta">
+      <div class="title">${esc(m.title)}</div>
+      <div class="gtags">${m.genres.map(esc).join(" · ")}</div>
+      <div class="st ${m.status}">${s.ic} ${s.label}</div>
+    </div></div>`;
+}
+
+/* ===== Детальная карточка ===== */
+function openDetail(id){
+  const m=MOVIES.find(x=>x.id===id);if(!m)return;
+  const t=rateOf(m);
+  const tsel=TIER_KEYS.map(k=>
+    `<button data-act="tier" data-id="${m.id}" data-tier="${k}"
+      class="${m.tier===k?'on':''}" style="${m.tier===k?`background:${TIERS[k].color}`:''}">${TIERS[k].ic} ${TIERS[k].label}</button>`).join("");
+  const toggle=m.status==="want"
+    ?`<button class="btn go" data-act="toggle" data-id="${m.id}">✓ В просмотренное</button>`
+    :`<button class="btn" data-act="toggle" data-id="${m.id}">↩ Вернуть в «хочу»</button>`;
+  const posterImg=m.poster?`<img src="${esc(m.poster)}" alt="" onerror="this.remove()">`:"";
+  document.getElementById("detail").innerHTML=`
+    <button class="close" data-act="close">✕</button>
+    <div class="hero">
+      <div class="bd" style="background-image:url('${esc(m.poster||"")}')"></div>
+      <div class="poster">${posterImg}</div>
+      <div class="info">
+        <div class="crumbs">Фильмы · ${esc(m.genres[0]||"")}${m.country?" · "+esc(m.country):""}</div>
+        <h2>${esc(m.title)}</h2>
+        <div class="metarow">
+          ${m.year?`<span>${esc(m.year)}</span><span class="dot-sep"></span>`:""}
+          <span>⏱ ${esc(m.runtime||"—")}</span><span class="dot-sep"></span>
+          <span style="color:${t.color};font-weight:700">${t.ic} ${t.label}</span>
+        </div>
+        <div class="pills">${m.genres.map(g=>`<span class="pill" style="border-color:${gcolor(g)}66">${esc(g)}</span>`).join("")}
+          ${m.orig?`<span class="pill">${esc(m.orig)}</span>`:""}</div>
+      </div>
+    </div>
+    <div class="body">
+      <p class="desc">${esc(m.desc||"Описание пока не добавлено.")}</p>
+      <div class="controls">
+        ${m.where?`<a class="btn primary" href="${esc(m.where)}" target="_blank" rel="noopener">▶ Где посмотреть</a>`:""}
+        ${toggle}
+        <button class="btn ghost sm" data-act="edit" data-id="${m.id}">✏️ Изменить</button>
+        <button class="btn danger sm" data-act="del" data-id="${m.id}">🗑️ Удалить</button>
+        ${m.status==="seen"
+          ? `<div class="tsel">${tsel}</div>`
+          : `<div class="rate-hint">⏳ Оценку можно поставить только после просмотра — нажми «✓ В просмотренное».</div>`}
+      </div>
+    </div>`;
+  document.getElementById("overlay").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeDetail(){document.getElementById("overlay").classList.remove("open");document.body.style.overflow=""}
+
+/* ===== Форма добавления / редактирования ===== */
+let editId=null,formDraft={};
+function openForm(id){
+  editId=id||null;
+  const m=id?MOVIES.find(x=>x.id===id):null;
+  formDraft=m?JSON.parse(JSON.stringify(m)):{status:"want",tier:"horoshie",genres:[]};
+  renderForm();
+  document.getElementById("formOverlay").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeForm(){document.getElementById("formOverlay").classList.remove("open");document.body.style.overflow="";editId=null}
+function renderForm(){
+  const d=formDraft;
+  const tierOpts=TIER_KEYS.map(k=>`<option value="${k}" ${d.tier===k?"selected":""}>${TIERS[k].ic} ${TIERS[k].label}</option>`).join("");
+  document.getElementById("formBox").innerHTML=`
+    <button class="close" data-fact="close">✕</button>
+    <h2>${editId?"Редактировать фильм":"Новый фильм"}</h2>
+    <p class="hint">Впиши название и нажми «Подтянуть» — постер и описание прилетят из Википедии. Любое поле можно поправить.</p>
+
+    <div class="fetch-row">
+      <div class="field" style="margin-bottom:0"><label>Название фильма</label>
+        <input id="fTitle" value="${esc(d.title||"")}" placeholder="Напр. Крёстный отец"></div>
+      <div class="field" style="flex:0 0 90px;margin-bottom:0"><label>Год</label>
+        <input id="fYear" value="${esc(d.year||"")}" placeholder="1972"></div>
+      <button class="btn sm" data-fact="fetch" style="flex:0 0 auto;height:44px">⬇ Подтянуть</button>
+    </div>
+    <div class="fetch-status" id="fetchStatus"></div>
+
+    <div class="field-row" style="align-items:flex-start">
+      <div style="flex:0 0 auto"><img id="fPreview" class="preview-poster ${d.poster?'show':''}" src="${esc(d.poster||"")}" onerror="this.classList.remove('show')"></div>
+      <div class="field" style="flex:1"><label>Ссылка на постер</label>
+        <input id="fPoster" value="${esc(d.poster||"")}" placeholder="https://… .jpg"></div>
+    </div>
+
+    <div class="field"><label>Краткое описание</label>
+      <textarea id="fDesc" placeholder="О чём фильм…">${esc(d.desc||"")}</textarea></div>
+
+    <div class="field"><label>Жанры (через запятую)</label>
+      <input id="fGenres" value="${esc((d.genres||[]).join(", "))}" placeholder="Комедия, Мелодрама"></div>
+
+    <div class="field-row">
+      <div class="field"><label>Продолжительность</label>
+        <input id="fRuntime" value="${esc(d.runtime||"")}" placeholder="1 ч 40 мин"></div>
+      <div class="field" id="fTierWrap" style="${d.status==="seen"?"":"display:none"}">
+        <label>Оценка</label><select id="fTier">${tierOpts}</select></div>
+    </div>
+
+    <div class="field"><label>Статус</label>
+      <div class="seg" id="fStatus">
+        <button type="button" data-st="want" class="${d.status!=="seen"?"on":""}">🔖 Хочу</button>
+        <button type="button" data-st="seen" class="${d.status==="seen"?"on":""}">✓ Просмотрено</button>
+      </div>
+      <div class="rate-hint" id="fRateHint" style="${d.status==="seen"?"display:none":"margin-top:9px"}">⏳ Оценку выставишь после просмотра.</div>
+    </div>
+
+    <div class="field"><label>Ссылка «Где посмотреть» (необязательно)</label>
+      <input id="fWhere" value="${esc(d.where||"")}" placeholder="оставь пустым → поиск по Кинопоиску"></div>
+
+    <div class="form-actions">
+      <button class="btn ghost" data-fact="close">Отмена</button>
+      <button class="btn primary" data-fact="save">${editId?"Сохранить":"Добавить в коллекцию"}</button>
+    </div>`;
+  // живой превью постера
+  document.getElementById("fPoster").addEventListener("input",e=>{
+    const p=document.getElementById("fPreview");p.src=e.target.value;
+    p.classList.toggle("show",!!e.target.value.trim());});
+  document.getElementById("fStatus").addEventListener("click",e=>{
+    const b=e.target.closest("[data-st]");if(!b)return;
+    formDraft.status=b.dataset.st;
+    [...e.currentTarget.children].forEach(x=>x.classList.toggle("on",x===b));
+    const seen=b.dataset.st==="seen";
+    document.getElementById("fTierWrap").style.display=seen?"":"none";
+    document.getElementById("fRateHint").style.display=seen?"none":"";});
+}
+
+/* Подтяжка с Википедии (CORS open, origin=*) */
+async function fetchMeta(){
+  const title=document.getElementById("fTitle").value.trim();
+  const year=document.getElementById("fYear").value.trim();
+  const st=document.getElementById("fetchStatus");
+  if(!title){st.className="fetch-status err";st.textContent="Сначала впиши название.";return;}
+  st.className="fetch-status load";st.textContent="Ищу в Википедии…";
+  const search=encodeURIComponent(title+(year?(" "+year):"")+" фильм");
+  const url=`https://ru.wikipedia.org/w/api.php?action=query&format=json&origin=*`+
+    `&generator=search&gsrsearch=${search}&gsrlimit=1`+
+    `&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=original|thumbnail&pithumbsize=600`;
+  try{
+    const r=await fetch(url);const j=await r.json();
+    const pages=j?.query?.pages;
+    if(!pages){st.className="fetch-status err";st.textContent="Ничего не нашлось. Заполни вручную.";return;}
+    const p=Object.values(pages)[0];
+    let poster=p.original?.source||p.thumbnail?.source||"";
+    let desc=(p.extract||"").trim();
+    if(desc.length>500)desc=desc.slice(0,500).replace(/\s+\S*$/,"")+"…";
+    // iTunes — запасной постер + продолжительность + жанр (Вики прячет несвободные афиши)
+    const it=await itunes(title,year);
+    if(!poster&&it.poster)poster=it.poster;
+    let genres=genresFromText(desc);
+    if(!genres.length&&it.genre)genres=[it.genre];
+    if(poster){document.getElementById("fPoster").value=poster;
+      const pv=document.getElementById("fPreview");pv.src=poster;pv.classList.add("show");}
+    if(desc)document.getElementById("fDesc").value=desc;
+    const gEl=document.getElementById("fGenres");if(genres.length&&!gEl.value.trim())gEl.value=genres.join(", ");
+    const rEl=document.getElementById("fRuntime");if(it.runtime&&!rEl.value.trim())rEl.value=it.runtime;
+    st.className="fetch-status ok";
+    st.textContent="Готово: "+(p.title||title)+(poster?"":" — постер не нашёлся, вставь ссылку сам");
+  }catch(e){
+    // Вики не ответила — пробуем хотя бы данные из iTunes
+    const it=await itunes(title,year);
+    if(it.poster){document.getElementById("fPoster").value=it.poster;
+      const pv=document.getElementById("fPreview");pv.src=it.poster;pv.classList.add("show");
+      const gEl=document.getElementById("fGenres");if(it.genre&&!gEl.value.trim())gEl.value=it.genre;
+      const rEl=document.getElementById("fRuntime");if(it.runtime&&!rEl.value.trim())rEl.value=it.runtime;
+      st.className="fetch-status ok";st.textContent="Нашёл постер в iTunes. Описание впиши вручную.";}
+    else{st.className="fetch-status err";st.textContent="Не удалось загрузить. Заполни вручную.";}
+  }
+}
+// iTunes Search API (CORS open): постер, жанр, продолжительность
+async function itunes(title,year){
+  const GMAP={Comedy:"Комедия",Drama:"Драма",Romance:"Мелодрама",Action:"Боевик",
+    "Sci-Fi & Fantasy":"Фантастика","Action & Adventure":"Боевик",Adventure:"Приключения",
+    Thriller:"Триллер",Horror:"Ужасы",Crime:"Криминал",Mystery:"Детектив",
+    Animation:"Мультфильм",Documentary:"Документальный",Kids:"Семейный","Kids & Family":"Семейный",
+    Western:"Вестерн",Musical:"Мюзикл",War:"Военный",History:"Исторический"};
+  try{
+    const q=encodeURIComponent(title+(year?(" "+year):""));
+    const r=await fetch(`https://itunes.apple.com/search?media=movie&entity=movie&limit=1&term=${q}`);
+    const j=await r.json();const res=j?.results?.[0];if(!res)return {};
+    const art=res.artworkUrl100?res.artworkUrl100.replace(/\/\d+x\d+bb/,"/600x600bb"):"";
+    const g=res.primaryGenreName?(GMAP[res.primaryGenreName]||res.primaryGenreName):"";
+    let rt="";if(res.trackTimeMillis){const min=Math.round(res.trackTimeMillis/60000);
+      const h=Math.floor(min/60),m=min%60;rt=(h?h+" ч ":"")+(m?m+" мин":"").trim();}
+    return {poster:art,genre:g,runtime:rt};
+  }catch(e){return {}}
+}
+// вытащить жанры из русского описания Википедии (по ключевым словам)
+function genresFromText(text){
+  const t=(text||"").toLowerCase();
+  const map=[["комедий","Комедия"],["мелодрам","Мелодрама"],["романтич","Мелодрама"],
+    ["драматическ","Драма"],["боевик","Боевик"],["фантастик","Фантастика"],["фэнтези","Фэнтези"],
+    ["триллер","Триллер"],["ужас","Ужасы"],["приключен","Приключения"],["детектив","Детектив"],
+    ["криминал","Криминал"],["гангстер","Криминал"],["мультфильм","Мультфильм"],["анимацион","Мультфильм"],
+    ["мюзикл","Мюзикл"],["военн","Военный"],["историческ","Исторический"],["биографич","Биография"],
+    ["вестерн","Вестерн"],["документальн","Документальный"]];
+  const out=[];for(const [k,v] of map){if(t.includes(k)&&!out.includes(v))out.push(v);}
+  return out.slice(0,3);
+}
+
+function saveForm(){
+  const title=document.getElementById("fTitle").value.trim();
+  if(!title){const st=document.getElementById("fetchStatus");st.className="fetch-status err";st.textContent="Название обязательно.";return;}
+  const year=document.getElementById("fYear").value.trim();
+  const genres=document.getElementById("fGenres").value.split(",").map(s=>s.trim()).filter(Boolean);
+  const where=document.getElementById("fWhere").value.trim()||
+    ("https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent(title+(year?" "+year:"")));
+  const data={
+    title,year,orig:formDraft.orig||"",
+    country:formDraft.country||"",runtime:document.getElementById("fRuntime").value.trim(),
+    poster:document.getElementById("fPoster").value.trim(),
+    desc:document.getElementById("fDesc").value.trim(),
+    genres:genres.length?genres:["Без жанра"],
+    tier:document.getElementById("fTier").value,
+    status:formDraft.status||"want",
+    where
+  };
+  if(editId){const m=MOVIES.find(x=>x.id===editId);Object.assign(m,data);}
+  else{data.id="m"+Date.now().toString(36);MOVIES.unshift(data);}
+  persist();render();closeForm();
+  if(editId)openDetail(editId);
+}
+
+/* ===== События ===== */
+document.addEventListener("click",e=>{
+  const nav=e.target.closest(".item");
+  if(nav){const k=nav.dataset.kind,v=nav.dataset.val;f[k]=v;render();return;}
+  const card=e.target.closest(".poster-card");
+  if(card){openDetail(card.dataset.id);return;}
+  const act=e.target.closest("[data-act]");
+  if(act){
+    const a=act.dataset.act;
+    if(a==="close")return closeDetail();
+    const m=MOVIES.find(x=>x.id===act.dataset.id);
+    if(a==="toggle"){m.status=m.status==="want"?"seen":"want";persist();render();openDetail(m.id);}
+    if(a==="tier"){m.tier=act.dataset.tier;persist();render();openDetail(m.id);}
+    if(a==="edit"){closeDetail();openForm(m.id);}
+    if(a==="del"){if(confirm(`Удалить «${m.title}» из коллекции?`)){
+      MOVIES=MOVIES.filter(x=>x.id!==m.id);persist();render();closeDetail();}}
+    return;
+  }
+  const fact=e.target.closest("[data-fact]");
+  if(fact){
+    const a=fact.dataset.fact;
+    if(a==="close")return closeForm();
+    if(a==="fetch")return fetchMeta();
+    if(a==="save")return saveForm();
+  }
+});
+document.getElementById("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeDetail()});
+document.getElementById("formOverlay").addEventListener("click",e=>{if(e.target.id==="formOverlay")closeForm()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDetail();closeForm();}});
+document.getElementById("search").addEventListener("input",e=>{f.q=e.target.value;render()});
+document.getElementById("addBtn").addEventListener("click",()=>openForm(null));
+
+/* ===== Летающие синие шарики ===== */
+(function makeParticles(){
+  const box=document.getElementById("particles");if(!box)return;
+  const N=22;let html="";
+  for(let i=0;i<N;i++){
+    const size=(6+Math.random()*18).toFixed(0);
+    const left=(Math.random()*100).toFixed(1);
+    const dur=(16+Math.random()*20).toFixed(1);
+    const delay=(-Math.random()*dur).toFixed(1);
+    const dx=((Math.random()*2-1)*120).toFixed(0);
+    const o=(0.05+Math.random()*0.13).toFixed(2);
+    html+=`<span class="particle" style="width:${size}px;height:${size}px;left:${left}%;`+
+      `animation-duration:${dur}s;animation-delay:${delay}s;--dx:${dx}px;--o:${o}"></span>`;
+  }
+  box.innerHTML=html;
+})();
+
+/* ===== Раскрывающиеся секции (accordion) ===== */
+const ACC_KEY="movieAcc_v1";
+let accState={};try{accState=JSON.parse(localStorage.getItem(ACC_KEY))||{}}catch(e){}
+document.querySelectorAll(".acc").forEach(a=>{
+  const id=a.dataset.acc;
+  if(accState[id]===false)a.classList.add("collapsed");
+  a.querySelector(".acc-head").addEventListener("click",()=>{
+    const collapsed=a.classList.toggle("collapsed");
+    accState[id]=!collapsed;localStorage.setItem(ACC_KEY,JSON.stringify(accState));});
+});
+
+/* ===== Фильтр по году ===== */
+const yf=document.getElementById("yearFrom"),yt=document.getElementById("yearTo");
+function syncQuick(){document.querySelectorAll("#yearQuick button").forEach(b=>{
+  const d=+b.dataset.dec;b.classList.toggle("on",f.yearFrom===d&&f.yearTo===d+9);});}
+function applyYear(){f.yearFrom=yf.value?+yf.value:null;f.yearTo=yt.value?+yt.value:null;syncQuick();render();}
+yf.addEventListener("input",applyYear);yt.addEventListener("input",applyYear);
+document.getElementById("yearReset").addEventListener("click",()=>{
+  yf.value="";yt.value="";f.yearFrom=null;f.yearTo=null;syncQuick();render();});
+document.getElementById("yearQuick").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-dec]");if(!b)return;
+  const d=+b.dataset.dec;
+  if(f.yearFrom===d&&f.yearTo===d+9){f.yearFrom=null;f.yearTo=null;yf.value="";yt.value="";}
+  else{f.yearFrom=d;f.yearTo=d+9;yf.value=d;yt.value=d+9;}
+  syncQuick();render();});
+(function buildYearQuick(){
+  const ys=MOVIES.map(m=>+m.year).filter(Boolean);if(!ys.length)return;
+  const min=Math.min(...ys),max=Math.max(...ys),decs=[];
+  for(let d=Math.floor(min/10)*10;d<=max;d+=10)decs.push(d);
+  document.getElementById("yearQuick").innerHTML=decs.map(d=>`<button data-dec="${d}">${d}-е</button>`).join("");
+})();
+
+const themeBtn=document.getElementById("themeBtn");
+themeBtn.addEventListener("click",()=>{
+  const cur=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",cur);
+  themeBtn.textContent=cur==="dark"?"🌙":"☀️";localStorage.setItem("movieTheme",cur);});
+const savedTheme=localStorage.getItem("movieTheme");
+if(savedTheme){document.documentElement.setAttribute("data-theme",savedTheme);
+  themeBtn.textContent=savedTheme==="dark"?"🌙":"☀️";}
+
+render();
+</script>
+</body>
+</html>
